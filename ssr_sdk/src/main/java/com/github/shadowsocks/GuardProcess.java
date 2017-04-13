@@ -1,5 +1,7 @@
 package com.github.shadowsocks;
 
+import com.github.shadowsocks.utils.Callback;
+
 import java.io.IOException;
 import java.lang.*;
 import java.lang.System;
@@ -20,8 +22,7 @@ public class GuardProcess {
     public GuardProcess(List<String> cmd) {
         this.cmd = cmd;
     }
-
-    public GuardProcess start() {
+    public GuardProcess start(final Callback restartCallback) {
         final Semaphore semaphore = new Semaphore(1);
         try {
             semaphore.acquire();
@@ -32,11 +33,15 @@ public class GuardProcess {
             @Override
             public void run() {
                 try {
+                    Callback callback = null;
                     while (!isDestroyed) {
                         long startTime = System.currentTimeMillis();
-
                         process = new ProcessBuilder(cmd).redirectErrorStream(true).start();
-
+                        if (callback == null) {
+                            callback = restartCallback;
+                        } else {
+                            callback.callback();
+                        }
                         semaphore.release();
                         process.waitFor();
                         synchronized (this) {

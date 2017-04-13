@@ -13,7 +13,7 @@ public class IOUtils {
         try {
             byte[] bytes = new byte[1024];
             int len = 0;
-            while ((len = in.read(bytes)) != 0) {
+            while ((len = in.read(bytes)) > 0) {
                 out.write(bytes,0,len);
             }
             out.flush();

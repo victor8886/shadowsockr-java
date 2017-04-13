@@ -13,6 +13,7 @@ import com.github.shadowsocks.constant.ConfigUtils;
 import com.github.shadowsocks.constant.Route;
 import com.github.shadowsocks.constant.State;
 import com.github.shadowsocks.database.Profile;
+import com.github.shadowsocks.utils.Callback;
 import com.github.shadowsocks.utils.Utils;
 
 import java.io.File;
@@ -21,7 +22,7 @@ import java.lang.*;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class ShadowsocksVpnService extends BaseService {
+public class ShadowsocksVpnService extends BaseService implements Callback {
     private final int VPN_MTU = 1500;
     private final String PRIVATE_VLAN = "26.26.26.%s";
     private final String PRIVATE_VLAN6 = "fdfe:dcba:9876::%s";
@@ -31,6 +32,7 @@ public class ShadowsocksVpnService extends BaseService {
     private GuardProcess sstunnelProcess;
     private GuardProcess pdnsdProcess;
     private GuardProcess tun2socksPrcess;
+    private int mFd;
 
     public ShadowsocksVpnService() {
     }
@@ -164,7 +166,7 @@ public class ShadowsocksVpnService extends BaseService {
             cmd.add("--acl");
             cmd.add(getApplicationInfo().dataDir+'/'+profile.route+".acl");
         }
-        sslocalProcess = new GuardProcess(cmd).start();
+        sslocalProcess = new GuardProcess(cmd).start(null);
     }
 
     private void startDnsTunel() {
@@ -198,17 +200,19 @@ public class ShadowsocksVpnService extends BaseService {
         } else {
             cmd.add(profile.dns.split(",")[0]);
         }
-        sstunnelProcess = new GuardProcess(cmd).start();
+        sstunnelProcess = new GuardProcess(cmd).start(null);
 
     }
 
     private void startDnsDaemon() {
         String reject = profile.ipv6 ? "224.0.0.0/3" : "224.0.0.0/3, ::/0";
         String protect = "protect = \"" +protectPath+"\";";
-        String china_dns_setting = "";
-        String black_list = getString(R.string.black_list);
 
+        String china_dns_setting = "";
+
+        String black_list = getString(R.string.black_list);
         String[] china_dnss = profile.china_dns.split(",");
+
         for (int i = 0; i < china_dnss.length; i++) {
             china_dns_setting += String.format(Locale.ENGLISH, ConfigUtils.REMOTE_SERVER,
                     china_dnss[i].split(":")[0],
@@ -237,12 +241,12 @@ public class ShadowsocksVpnService extends BaseService {
                         "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject);
                 break;
         }
-            Utils.printToFile(conf,new File(getApplicationInfo().dataDir+"/pdnsd-vpn.conf"));
+        Utils.printToFile(conf,new File(getApplicationInfo().dataDir+"/pdnsd-vpn.conf"));
         ArrayList<String> cmd = new ArrayList<>();
         cmd.add(getApplicationInfo().dataDir+"/pdnsd");
         cmd.add("-c");
         cmd.add(getApplicationInfo().dataDir+"/pdnsd-vpn.conf");
-        pdnsdProcess = new GuardProcess(cmd).start();
+        pdnsdProcess = new GuardProcess(cmd).start(null);
     }
 
     private void startShadowsocksUDPDaemon() {
@@ -266,7 +270,65 @@ public class ShadowsocksVpnService extends BaseService {
         cmd.add(getApplicationInfo().dataDir);
         cmd.add("-c");
         cmd.add(getApplicationInfo().dataDir+"/ss-local-udp-vpn.conf");
-        sstunnelProcess = new GuardProcess(cmd).start();
+        sstunnelProcess = new GuardProcess(cmd).start(null);
+    }
+
+
+
+    private int startvpn() {
+        Builder builder = new Builder();
+        builder.setSession(profile.name)
+                .setMtu(VPN_MTU)
+                .addAddress(String.format(Locale.ENGLISH, PRIVATE_VLAN, "1"), 24)
+                .addDnsServer(profile.dns.split(",")[0].split(":")[0]);
+        if (profile.ipv6) {
+            builder.addAddress(String.format(Locale.ENGLISH, PRIVATE_VLAN6, "1"), 126)
+                    .addRoute("::", 0);
+        }
+        if (profile.route == Route.ALL || profile.route == Route.BYPASS_CHN) {
+            builder.addRoute("0.0.0.0", 0);
+        } else {
+            /*String[] stringArray = getResources().getStringArray(R.array.bypass_private_route);
+            for (int i = 0; i < stringArray.length; i++) {
+                String[] strings = stringArray[i].split("/");
+                builder.addRoute(strings[0], Integer.decode(strings[1]));
+            }*/
+        }
+        builder.addRoute(profile.dns.split(",")[0].split(":")[0], 32);
+        conn = builder.establish();
+        if (conn == null) {
+            throw new NullPointerException();
+        }
+        mFd = conn.getFd();
+        ArrayList<String> cmd = new ArrayList<>();
+        cmd.add(getApplicationInfo().dataDir+"/tun2socks");
+        cmd.add("--netif-ipaddr");
+        cmd.add(String.format(Locale.ENGLISH, PRIVATE_VLAN, "2"));
+        cmd.add("--netif-netmask");
+        cmd.add("255.255.255.0");
+        cmd.add("--socks-server-addr");
+        cmd.add("127.0.0.1:" + profile.localPort);
+        cmd.add("--tunfd");
+        cmd.add(mFd +"");
+        cmd.add("--tunmtu");
+        cmd.add(VPN_MTU + "");
+        cmd.add("--sock-path");
+        cmd.add(getApplicationInfo().dataDir + "/sock_path");
+        cmd.add("--loglevel");
+        cmd.add("3");
+        if (profile.ipv6) {
+            cmd.add("--netif-ip6addr");
+            cmd.add(String.format(Locale.ENGLISH,PRIVATE_VLAN6,"2"));
+        }
+        if (profile.udpdns) {
+            cmd.add("--enable-udprelay");
+        } else {
+            cmd.add("--dnsgw");
+            cmd.add(String.format(Locale.ENGLISH, "%s:%d", String.format(Locale.ENGLISH,
+                    PRIVATE_VLAN, "1"), profile.localPort + 53));
+        }
+        tun2socksPrcess = new GuardProcess(cmd).start(null);
+        return mFd;
     }
 
     private boolean sendFd(int fd) {
@@ -287,24 +349,8 @@ public class ShadowsocksVpnService extends BaseService {
         return false;
     }
 
-    private int startvpn() {
-        Builder builder = new Builder();
-        builder.setSession(profile.name)
-                .setMtu(VPN_MTU)
-                .addAddress(String.format(Locale.ENGLISH, PRIVATE_VLAN, "1"), 24)
-                .addDnsServer(profile.dns.split(",")[0].split(":")[0]);
-        if (profile.ipv6) {
-            builder.addAddress(String.format(Locale.ENGLISH, PRIVATE_VLAN6, "1"), 126)
-                    .addRoute("::", 0);
-        }
-        if (profile.route == Route.ALL || profile.route == Route.BYPASS_CHN) {
-            builder.addRoute("0.0.0.0", 0);
-        } else {
-            getResources().getStringArray(R.array.)
-        }
-
-
-        return 0;
-
+    @Override
+    public void callback() {
+        sendFd(mFd);
     }
 }

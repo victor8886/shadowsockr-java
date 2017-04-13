@@ -147,12 +147,12 @@ public class Shadowsocks extends ServiceBoundContext {
     }
 
     private void updatePreferenceScreen(Profile profile) {
-        profile.host = "n1.ssr.0v0.loan";
+        profile.host = "182.61.100.95";
         profile.localPort = 1080;
-        profile.remotePort = 1162;
-        profile.password = "LcQiZd";
-        profile.protocol = "auth_sha1_v2";
-        profile.obfs = "http_simple";
+        profile.remotePort = 10369;
+        profile.password = "5X8BAfwLsPmC";
+        //profile.protocol = "auth_sha1_v2";
+        //profile.obfs = "http_simple";
         mProfile = profile;
 
     }

@@ -29,7 +29,7 @@ public class Utils {
 
             try {
                 Lookup lookup = new Lookup(host, addrType);
-                SimpleResolver resolver = new SimpleResolver("114.14.114.114");
+                SimpleResolver resolver = new SimpleResolver("114.114.114.114");
                 resolver.setTimeout(5);
                 lookup.setResolver(resolver);
                 Record[] result = lookup.run();
@@ -56,7 +56,9 @@ public class Utils {
         String addr = null;
         if (enableIPv6 && Utils.isIPv6Support()) {
              addr = resolve(host, Type.AAAA);
-            return addr;
+            if (addr != null) {
+                return addr;
+            }
         }
         addr = resolve(host, Type.A);
         if (addr != null) {
