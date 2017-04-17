@@ -123,7 +123,13 @@ public abstract class BaseService extends VpnService {
         handler = new Handler(getMainLooper());
         restartHandler = new Handler(getMainLooper());
         protectPath = getApplicationInfo().dataDir + "/protect_path";
-        SS_SDK.getInstance().updateAssets(this);
+        new Thread(){
+            @Override
+            public void run() {
+                SS_SDK.getInstance().updateAssets(BaseService.this);
+            }
+        }.start();
+
     }
 
     @Override

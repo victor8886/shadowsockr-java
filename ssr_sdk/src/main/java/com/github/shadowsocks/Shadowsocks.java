@@ -39,6 +39,7 @@ public class Shadowsocks extends ServiceBoundContext {
                             break;
                         case State.STOPPED:
                             //stopped
+                            changeSwitch(false);
                             break;
                         case State.STOPPING:
                             //stopping
@@ -151,6 +152,9 @@ public class Shadowsocks extends ServiceBoundContext {
         profile.localPort = 1080;
         profile.remotePort = 10369;
         profile.password = "5X8BAfwLsPmC";
+        profile.udpdns = false;
+        profile.ipv6 = false;
+        profile.bypass = false;
         //profile.protocol = "auth_sha1_v2";
         //profile.obfs = "http_simple";
         mProfile = profile;

@@ -39,7 +39,6 @@
             android:name=".Shadowsocks"></activity>
 
         <service
-            android:process=":bg"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:name=".ShadowsocksVpnService" >
             <intent-filter>
