@@ -1,5 +1,7 @@
 package com.liang.victor.myssrlib;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -7,7 +9,7 @@ import android.widget.Button;
 import com.github.shadowsocks.Shadowsocks;
 
 
-public class MainActivity extends Shadowsocks implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +22,6 @@ public class MainActivity extends Shadowsocks implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switchVpn();
+
     }
 }

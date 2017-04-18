@@ -105,10 +105,8 @@ public class ShadowsocksVpnService extends BaseService implements Callback {
 
     @Override
     public void connect() {
-        Log.d("service", "connect");
         vpnThread = new ShadowsocksVpnThread(this);
         vpnThread.start();
-        Log.d("service", "start l ");
         killProcesses();
         //判断serveraddress
         if (!Utils.isNumeric(profile.host)) {
@@ -286,15 +284,15 @@ public class ShadowsocksVpnService extends BaseService implements Callback {
             builder.addAddress(String.format(Locale.ENGLISH, PRIVATE_VLAN6, "1"), 126)
                     .addRoute("::", 0);
         }
-        if (profile.route == Route.ALL || profile.route == Route.BYPASS_CHN) {
+        /*if (profile.route == Route.ALL || profile.route == Route.BYPASS_CHN) {
             //builder.addRoute("0.0.0.0", 0);
         } else {
-            /*String[] stringArray = getResources().getStringArray(R.array.bypass_private_route);
+            *//*String[] stringArray = getResources().getStringArray(R.array.bypass_private_route);
             for (int i = 0; i < stringArray.length; i++) {
                 String[] strings = stringArray[i].split("/");
                 builder.addRoute(strings[0], Integer.decode(strings[1]));
-            }*/
-        }
+            }*//*
+        }*/
         builder.addRoute("0.0.0.0", 0);
         builder.addRoute(profile.dns.split(",")[0].split(":")[0], 32);
         conn = builder.establish();

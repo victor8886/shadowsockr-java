@@ -1,6 +1,7 @@
 package com.github.shadowsocks.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.preference.PreferenceManager;
@@ -15,6 +16,7 @@ import com.github.shadowsocks.constant.Key;
 import com.github.shadowsocks.database.DBHelper;
 import com.github.shadowsocks.database.Profile;
 import com.github.shadowsocks.database.ProfileManager;
+import com.github.shadowsocks.interfaces.SetProfile;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,13 +30,16 @@ import eu.chainfire.libsuperuser.Shell;
 /**
  * Created by victor on 2017/4/6.
  */
-public class SS_SDK {
+public class SS_SDK implements SetProfile {
     private static SS_SDK ourInstance = new SS_SDK();
     private ArrayList<String> EXECUTABLES = new ArrayList<>();
     private SharedPreferences settings;
     private SharedPreferences.Editor editor;
     public ProfileManager profileManager;
-    public static Shadowsocks shadowsocks;
+    public Shadowsocks shadowsocks;
+    private  String host;
+    private int remotePort;
+    private String password;
 
     public static SS_SDK getInstance() {
         return ourInstance;
@@ -137,6 +142,18 @@ public class SS_SDK {
         if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE)
             copyAssets(context);
     }
+    public void setProfile(String host,int remotePort,String password){
+    }
+    public void switchVpn(Context context){
+        Shadowsocks.setProfile(this);
+        context.startActivity(new Intent(context, Shadowsocks.class));
+    }
 
 
+    @Override
+    public void set(Profile profile) {
+        profile.host = host;
+        profile.remotePort = remotePort;
+        profile.password = password;
+    }
 }

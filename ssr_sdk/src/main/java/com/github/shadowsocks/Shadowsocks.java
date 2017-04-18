@@ -6,13 +6,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback;
 import com.github.shadowsocks.constant.State;
 import com.github.shadowsocks.database.Profile;
+import com.github.shadowsocks.interfaces.SetProfile;
 import com.github.shadowsocks.utils.SS_SDK;
 
 public class Shadowsocks extends ServiceBoundContext {
+    private static SetProfile  setProfile;
     private final int REQUEST_CONNECT = 1;
     private boolean serviceStarted;
     int state = State.STOPPED;
@@ -21,7 +26,9 @@ public class Shadowsocks extends ServiceBoundContext {
     Profile mProfile ;
     //boolean vpnState;
     Handler handler = new Handler();
-
+    public static void setProfile(SetProfile set) {
+        setProfile = set;
+    }
     private IShadowsocksServiceCallback.Stub callback = new IShadowsocksServiceCallback.Stub() {
         @Override
         public void stateChanged(final int s, String profileName, String msg) throws RemoteException {
@@ -36,10 +43,12 @@ public class Shadowsocks extends ServiceBoundContext {
                                 //connecting
                             }
                             changeSwitch(true);
+                            finish();
                             break;
                         case State.STOPPED:
                             //stopped
                             changeSwitch(false);
+                            finish();
                             break;
                         case State.STOPPING:
                             //stopping
@@ -95,6 +104,14 @@ public class Shadowsocks extends ServiceBoundContext {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Window window = getWindow();
+        window.setGravity(Gravity.LEFT | Gravity.TOP);
+        WindowManager.LayoutParams params = window.getAttributes();
+        params.x = 0;
+        params.y = 0;
+        params.height = 1;
+        params.width = 1;
+        window.setAttributes(params);
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -145,16 +162,25 @@ public class Shadowsocks extends ServiceBoundContext {
         super.onResume();
         updateCurrentProfile();
         updateState();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                switchVpn();
+            }
+        },1000);
     }
 
     private void updatePreferenceScreen(Profile profile) {
-        profile.host = "182.61.100.95";
+        /*profile.host = "182.61.100.95";
         profile.localPort = 1080;
         profile.remotePort = 10369;
         profile.password = "5X8BAfwLsPmC";
         profile.udpdns = false;
         profile.ipv6 = false;
-        profile.bypass = false;
+        profile.bypass = false;*/
+        if (setProfile != null) {
+            setProfile.set(profile);
+        }
         //profile.protocol = "auth_sha1_v2";
         //profile.obfs = "http_simple";
         mProfile = profile;
@@ -204,6 +230,7 @@ public class Shadowsocks extends ServiceBoundContext {
             default:
                 cancelStart();
         }
+
     }
 
     private void serviceStop() {
@@ -218,7 +245,7 @@ public class Shadowsocks extends ServiceBoundContext {
 
     private void serviceLoad() {
         try {
-            Log.e("app profileid","app profile id="+app.profileId());
+            //Log.e("app profileid","app profile id="+app.profileId());
             bgService.use(app.profileId());
         } catch (RemoteException e) {
             e.printStackTrace();

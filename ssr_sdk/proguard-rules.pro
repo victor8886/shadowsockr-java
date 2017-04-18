@@ -15,3 +15,10 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+  -keep class com.github.shadowsocks.System { *; }
+  -keep class okhttp3.** { *; }
+  -keep interface okhttp3.** { *; }
+  -dontwarn okio.**
+  -dontwarn com.google.android.gms.internal.**
+  -dontwarn com.j256.ormlite.**
+  -dontwarn org.xbill.**
