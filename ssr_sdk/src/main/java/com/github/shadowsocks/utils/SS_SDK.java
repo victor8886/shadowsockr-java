@@ -13,6 +13,7 @@ import com.github.shadowsocks.Shadowsocks;
 import com.github.shadowsocks.System;
 import com.github.shadowsocks.constant.Executable;
 import com.github.shadowsocks.constant.Key;
+import com.github.shadowsocks.constant.Route;
 import com.github.shadowsocks.database.DBHelper;
 import com.github.shadowsocks.database.Profile;
 import com.github.shadowsocks.database.ProfileManager;
@@ -143,6 +144,9 @@ public class SS_SDK implements SetProfile {
             copyAssets(context);
     }
     public void setProfile(String host,int remotePort,String password){
+        this.host = host;
+        this.remotePort = remotePort;
+        this.password = password;
     }
     public void switchVpn(Context context){
         Shadowsocks.setProfile(this);
@@ -155,5 +159,10 @@ public class SS_SDK implements SetProfile {
         profile.host = host;
         profile.remotePort = remotePort;
         profile.password = password;
+        profile.localPort = 1080;
+        profile.udpdns = false;
+        profile.ipv6 = false;
+        profile.bypass = false;
+        profile.route = Route.GFWLIST;
     }
 }

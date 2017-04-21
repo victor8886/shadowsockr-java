@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.github.shadowsocks.Shadowsocks;
+import com.github.shadowsocks.utils.SS_SDK;
 
 
 public class MainActivity extends Activity implements View.OnClickListener {
@@ -22,6 +23,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-
+        SS_SDK.getInstance().setProfile("182.61.100.95",10369,"5X8BAfwLsPmC");
+        SS_SDK.getInstance().switchVpn(this);
     }
 }
