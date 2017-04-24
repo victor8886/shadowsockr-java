@@ -41,6 +41,7 @@ public class SS_SDK implements SetProfile {
     private  String host;
     private int remotePort;
     private String password;
+    private String protocol = "origin";
 
     public static SS_SDK getInstance() {
         return ourInstance;
@@ -143,10 +144,12 @@ public class SS_SDK implements SetProfile {
         if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE)
             copyAssets(context);
     }
-    public void setProfile(String host,int remotePort,String password){
+    public void setProfile(String host,int remotePort,
+                           String password,String protocol){
         this.host = host;
         this.remotePort = remotePort;
         this.password = password;
+        this.protocol = protocol;
     }
     public void switchVpn(Context context){
         Shadowsocks.setProfile(this);
@@ -164,5 +167,7 @@ public class SS_SDK implements SetProfile {
         profile.ipv6 = false;
         profile.bypass = false;
         profile.route = Route.GFWLIST;
+        profile.method = "aes-256-cfb";
+        profile.protocol = protocol;
     }
 }
