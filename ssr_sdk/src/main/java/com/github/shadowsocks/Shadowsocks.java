@@ -55,6 +55,7 @@ public class Shadowsocks extends ServiceBoundContext {
                             break;
                     }
                     state = s;
+                    app.setState(state);
                 }
             });
         }

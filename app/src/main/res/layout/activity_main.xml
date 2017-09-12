@@ -10,13 +10,13 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.liang.victor.myssrlib.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
     <Button
         android:layout_centerInParent="true"
         android:id="@+id/switchButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:text="未连接"
+        android:textColor="#fff"
+        android:textSize="28sp"
+        android:background="@drawable/circle"
+        android:layout_width="150dp"
+        android:layout_height="150dp" />
 </RelativeLayout>

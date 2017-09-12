@@ -39,15 +39,32 @@ public class SS_SDK implements SetProfile {
     public ProfileManager profileManager;
     public Shadowsocks shadowsocks;
     private  String host;
+    private int state;
     private int remotePort;
     private String password;
     private String protocol = "origin";
+    private VpnCallback stateCallback;
+
+    public void setStateCallback(VpnCallback callback) {
+        stateCallback = callback;
+    }
 
     public static SS_SDK getInstance() {
         return ourInstance;
     }
 
     private SS_SDK() {
+    }
+
+    public int getVPNstate() {
+        return state;
+    }
+
+    public void setState(int state) {
+        if (stateCallback != null) {
+            stateCallback.callback(state);
+        }
+        this.state = state;
     }
 
     public static void init(Context context) {
