@@ -68,12 +68,14 @@ public class SS_SDK implements SetProfile {
     }
 
     public static void init(Context context) {
+        //初始化shadowsocks运行环境，添加so运行的参数
         ourInstance.EXECUTABLES.add(Executable.PDNSD);
         ourInstance.EXECUTABLES.add(Executable.REDSOCKS);
         ourInstance.EXECUTABLES.add(Executable.SS_TUNNEL);
         ourInstance.EXECUTABLES.add(Executable.SS_LOCAL);
         ourInstance.EXECUTABLES.add(Executable.TUN2SOCKS);
         ourInstance.EXECUTABLES.add(Executable.KCPTUN);
+        //获取shadowsocks配置文件管理类
         ourInstance.settings = PreferenceManager.getDefaultSharedPreferences(context);
         ourInstance.editor = ourInstance.settings.edit();
         ourInstance.profileManager = new ProfileManager(new DBHelper(context));
@@ -99,7 +101,7 @@ public class SS_SDK implements SetProfile {
     public Profile currentProfile() {
         return profileManager.getProfile(profileId());
     }
-
+    //切换shadowsock配置文件
     public Profile switchProfile(int id) {
         profileId(id);
         Profile profile = profileManager.getProfile(id);
@@ -131,7 +133,7 @@ public class SS_SDK implements SetProfile {
             }
         }
     }
-
+    //清理配置文件
     public void crashRecovery(Context context) {
         ArrayList<String> cmd = new ArrayList<>();
         String[] tasks = {"ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun"};
@@ -173,7 +175,10 @@ public class SS_SDK implements SetProfile {
         context.startActivity(new Intent(context, Shadowsocks.class));
     }
 
-
+    /**
+     * 设置shadowsocksr的各项参数，各种参数请自己琢磨
+     * @param profile
+     */
     @Override
     public void set(Profile profile) {
         profile.host = host;
@@ -185,6 +190,6 @@ public class SS_SDK implements SetProfile {
         profile.bypass = false;
         profile.route = Route.GFWLIST;
         profile.method = "aes-256-cfb";
-        profile.protocol = protocol;
+        profile.protocol = protocol;//ssr 的协议类型，默认origin
     }
 }

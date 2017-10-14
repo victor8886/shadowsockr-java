@@ -29,6 +29,8 @@ public class Shadowsocks extends ServiceBoundContext {
     public static void setProfile(SetProfile set) {
         setProfile = set;
     }
+
+    //因为vpn是单独的进程，所以这里用到aidl进行进程间的通信
     private IShadowsocksServiceCallback.Stub callback = new IShadowsocksServiceCallback.Stub() {
         @Override
         public void stateChanged(final int s, String profileName, String msg) throws RemoteException {
@@ -105,6 +107,8 @@ public class Shadowsocks extends ServiceBoundContext {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //vpn的开启需要activity的回调，因此这里耍个小聪明，
+        // 建立一个像素的activity，这样就可以在任何地方开启vpn了，比如服务里面
         Window window = getWindow();
         window.setGravity(Gravity.LEFT | Gravity.TOP);
         WindowManager.LayoutParams params = window.getAttributes();
@@ -262,7 +266,7 @@ public class Shadowsocks extends ServiceBoundContext {
     }
 
     private void updateState() {
-        //更新
+        //更新vpn状态
         if (bgService != null) {
             try {
                 switch (bgService.getState()) {

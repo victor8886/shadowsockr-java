@@ -31,6 +31,7 @@ public abstract class BaseService extends VpnService {
     Handler restartHandler = null;
     protected String protectPath = null;
     boolean closeReceiverRegistered ;
+    //实现aidl的接口，以供跨进程的数据传输，其实就是设置shadowsocks的参数，以及获取vpn的状态
     protected IShadowsocksService binder = new IShadowsocksService.Stub() {
         @Override
         public int getState(){

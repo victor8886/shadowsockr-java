@@ -22,6 +22,9 @@ import java.lang.*;
 import java.util.ArrayList;
 import java.util.Locale;
 
+/**
+ * vpn服务
+ */
 public class ShadowsocksVpnService extends BaseService implements Callback {
     private final int VPN_MTU = 1500;
     private final String PRIVATE_VLAN = "26.26.26.%s";

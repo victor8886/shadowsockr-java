@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements View.OnClickListener, VpnC
 
     @Override
     public void onClick(View v) {
-        // ip  端口  密码  协议类型  这里仅提供调用示例，具体请按照自己的配置去设置
+        //这里仅提供调用示例，具体请按照自己的配置去设置ip    远程端口    密码         协议类型
         SS_SDK.getInstance().setProfile("182.61.100.95",10369,"5X8BAfwLsPmC","origin");
         SS_SDK.getInstance().switchVpn(this);
     }
