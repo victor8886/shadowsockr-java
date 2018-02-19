@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.github.shadowsocks.BuildConfig;
 import com.github.shadowsocks.Shadowsocks;
@@ -38,11 +37,16 @@ public class SS_SDK implements SetProfile {
     private SharedPreferences.Editor editor;
     public ProfileManager profileManager;
     public Shadowsocks shadowsocks;
-    private  String host;
+    private String host;
     private int state;
     private int remotePort;
     private String password;
-    private String protocol = "origin";
+    private String protocol = "auth_chain_a";
+    private String protocol_param = "";
+    private String obfs = "tls1.2_ticket_auth";
+    private String obfs_param = "";
+    private String method = "chacha20";
+
     private VpnCallback stateCallback;
 
     public void setStateCallback(VpnCallback callback) {
@@ -101,6 +105,7 @@ public class SS_SDK implements SetProfile {
     public Profile currentProfile() {
         return profileManager.getProfile(profileId());
     }
+
     //切换shadowsock配置文件
     public Profile switchProfile(int id) {
         profileId(id);
@@ -124,7 +129,7 @@ public class SS_SDK implements SetProfile {
                 InputStream in = null;
                 OutputStream out = null;
                 try {
-                    in = assetManager.open(!TextUtils.isEmpty(path)? path +"/"+s:s);
+                    in = assetManager.open(!TextUtils.isEmpty(path) ? path + "/" + s : s);
                     out = new FileOutputStream(context.getApplicationInfo().dataDir + '/' + s);
                     IOUtils.copy(in, out);
                 } catch (IOException e) {
@@ -133,6 +138,7 @@ public class SS_SDK implements SetProfile {
             }
         }
     }
+
     //清理配置文件
     public void crashRecovery(Context context) {
         ArrayList<String> cmd = new ArrayList<>();
@@ -151,7 +157,7 @@ public class SS_SDK implements SetProfile {
         copyAssets("acl", context);
         ArrayList<String> cmd = new ArrayList<>();
         for (int i = 0; i < EXECUTABLES.size(); i++) {
-            String temp = "chmod 755 "+ context.getApplicationInfo().dataDir+"/"+EXECUTABLES.get(i);
+            String temp = "chmod 755 " + context.getApplicationInfo().dataDir + "/" + EXECUTABLES.get(i);
             cmd.add(temp);
         }
         Shell.SH.run(cmd);
@@ -163,20 +169,37 @@ public class SS_SDK implements SetProfile {
         if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE)
             copyAssets(context);
     }
-    public void setProfile(String host,int remotePort,
-                           String password,String protocol){
+
+    public void setProfile(String host, int remotePort,
+                           String password, String protocol) {
         this.host = host;
         this.remotePort = remotePort;
         this.password = password;
         this.protocol = protocol;
     }
-    public void switchVpn(Context context){
+
+    public void setProfile(String host, int remotePort,
+                           String password, String method, String protocol,
+                           String protocol_param, String obfs, String obfs_param) {
+        this.host = host;
+        this.remotePort = remotePort;
+        this.password = password;
+        this.method = method;
+        this.protocol = protocol;
+        this.protocol_param = protocol_param;
+        this.obfs = obfs;
+        this.obfs_param = obfs_param;
+
+    }
+
+    public void switchVpn(Context context) {
         Shadowsocks.setProfile(this);
         context.startActivity(new Intent(context, Shadowsocks.class));
     }
 
     /**
      * 设置shadowsocksr的各项参数，各种参数请自己琢磨
+     *
      * @param profile
      */
     @Override
@@ -189,7 +212,10 @@ public class SS_SDK implements SetProfile {
         profile.ipv6 = false;
         profile.bypass = false;
         profile.route = Route.GFWLIST;
-        profile.method = "aes-256-cfb";
+        profile.method = method;
         profile.protocol = protocol;//ssr 的协议类型，默认origin
+        profile.obfs = obfs;
+        profile.protocol_param = protocol_param;
+        profile.obfs_param = obfs_param;
     }
 }

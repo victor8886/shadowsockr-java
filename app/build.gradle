@@ -18,7 +18,7 @@ android {
         }
     }
 }
-
+repositories { flatDir { dirs 'libs' } }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -26,5 +26,6 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.0'
     testCompile 'junit:junit:4.12'
-    compile project(':ssr_sdk')
+  //  compile(name: 'ssr-sdk', ext: 'aar')
+     compile project(':ssr_sdk')
 }

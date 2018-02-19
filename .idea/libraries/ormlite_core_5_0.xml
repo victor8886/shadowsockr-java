@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ormlite-core-5.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ssr_sdk/libs/ormlite-core-5.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
