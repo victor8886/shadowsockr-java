@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ormlite-android-5.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ssr_sdk/libs/ormlite-android-5.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

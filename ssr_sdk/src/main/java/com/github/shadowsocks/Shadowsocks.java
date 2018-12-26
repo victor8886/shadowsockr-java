@@ -17,15 +17,16 @@ import com.github.shadowsocks.interfaces.SetProfile;
 import com.github.shadowsocks.utils.SS_SDK;
 
 public class Shadowsocks extends ServiceBoundContext {
-    private static SetProfile  setProfile;
+    private static SetProfile setProfile;
     private final int REQUEST_CONNECT = 1;
     private boolean serviceStarted;
     int state = State.STOPPED;
     SS_SDK app = SS_SDK.getInstance();
     Profile currentProfile = new Profile();
-    Profile mProfile ;
+    Profile mProfile;
     //boolean vpnState;
     Handler handler = new Handler();
+
     public static void setProfile(SetProfile set) {
         setProfile = set;
     }
@@ -139,10 +140,10 @@ public class Shadowsocks extends ServiceBoundContext {
     }
 
     private boolean updateCurrentProfile() {
-        if (mProfile == null||currentProfile.id != mProfile.id) {
+        if (mProfile == null || currentProfile.id != mProfile.id) {
             Profile profile = app.currentProfile();
             if (profile == null) {
-               profile = app.profileManager.getFirstProfile();//profile =  app.profileManager.createDefault();
+                profile = app.profileManager.getFirstProfile();//profile =  app.profileManager.createDefault();
             }
             if (profile == null) {
                 profile = app.profileManager.createDefault();
@@ -152,11 +153,11 @@ public class Shadowsocks extends ServiceBoundContext {
                 serviceLoad();
             }
             refreshProfile();
-        Log.d("profile id ", "id = " + currentProfile.id);
+            Log.d("profile id ", "id = " + currentProfile.id);
             return true;
         } else {
             refreshProfile();
-        Log.d("profile id ", "id = " + currentProfile.id);
+            Log.d("profile id ", "id = " + currentProfile.id);
             return false;
         }
 
@@ -172,7 +173,7 @@ public class Shadowsocks extends ServiceBoundContext {
             public void run() {
                 switchVpn();
             }
-        },1000);
+        }, 1000);
     }
 
     private void updatePreferenceScreen(Profile profile) {

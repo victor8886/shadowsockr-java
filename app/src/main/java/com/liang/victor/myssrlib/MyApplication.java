@@ -10,6 +10,7 @@ import com.github.shadowsocks.utils.SS_SDK;
 public class MyApplication extends Application {
     @Override
     public void onCreate() {
+        super.onCreate();
         SS_SDK.init(this);
     }
 }
